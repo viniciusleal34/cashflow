@@ -12,4 +12,5 @@
 /Users/viniciusleal/GitHub/cashflow/CashFlow.Application/obj/Debug/net8.0/refint/CashFlow.Application.dll
 /Users/viniciusleal/GitHub/cashflow/CashFlow.Application/obj/Debug/net8.0/CashFlow.Application.pdb
 /Users/viniciusleal/GitHub/cashflow/CashFlow.Application/obj/Debug/net8.0/ref/CashFlow.Application.dll
+/Users/viniciusleal/GitHub/cashflow/CashFlow.Application/obj/Debug/net8.0/CashFlow.Application.sourcelink.json
 /Users/viniciusleal/GitHub/cashflow/CashFlow.Application/obj/Debug/net8.0/CashFlow.7372E909.Up2Date

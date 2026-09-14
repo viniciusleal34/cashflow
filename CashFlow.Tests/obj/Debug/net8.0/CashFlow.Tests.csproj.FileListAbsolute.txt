@@ -147,3 +147,4 @@
 /Users/viniciusleal/GitHub/cashflow/CashFlow.Tests/bin/Debug/net8.0/Microsoft.Extensions.Options.ConfigurationExtensions.dll
 /Users/viniciusleal/GitHub/cashflow/CashFlow.Tests/bin/Debug/net8.0/Microsoft.Extensions.Primitives.dll
 /Users/viniciusleal/GitHub/cashflow/CashFlow.Tests/obj/Debug/net8.0/CashFlow.Tests.csproj.CopyComplete
+/Users/viniciusleal/GitHub/cashflow/CashFlow.Tests/obj/Debug/net8.0/CashFlow.Tests.sourcelink.json

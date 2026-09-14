@@ -66,6 +66,7 @@
 /Users/viniciusleal/GitHub/cashflow/CashFlow.API/bin/Debug/net8.0/runtimes/win-x86/native/zstd.dll
 /Users/viniciusleal/GitHub/cashflow/CashFlow.API/bin/Debug/net8.0/CashFlow.Application.dll
 /Users/viniciusleal/GitHub/cashflow/CashFlow.API/bin/Debug/net8.0/CashFlow.Application.pdb
+/Users/viniciusleal/GitHub/cashflow/CashFlow.API/obj/Debug/net8.0/CashFlow.API.sourcelink.json
 /Users/viniciusleal/GitHub/cashflow/CashFlow.API/bin/Debug/net8.0/CashFlow.API.staticwebassets.endpoints.json
 /Users/viniciusleal/GitHub/cashflow/CashFlow.API/obj/Debug/net8.0/rpswa.dswa.cache.json
 /Users/viniciusleal/GitHub/cashflow/CashFlow.API/obj/Debug/net8.0/rjimswa.dswa.cache.json

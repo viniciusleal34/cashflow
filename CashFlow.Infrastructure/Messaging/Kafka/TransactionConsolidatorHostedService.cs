@@ -114,32 +114,33 @@ public sealed class TransactionConsolidatorHostedService : BackgroundService
             {
                 _logger.LogWarning(ex, "Failed to consolidate message. Sending to DLQ.");
 
-                var dlqMessage = new DlqMessage(
-                    consumeResult.Message.Value,
-                    ex.Message,
-                    DateTime.UtcNow);
-
-                var dlqPayload = JsonSerializer.Serialize(dlqMessage);
-
-                try
-                {
-                    await dlqProducer.ProduceAsync(
-                        _options.TransactionCreatedDlqTopic,
-                        new Message<string, string>
-                        {
-                            Key = consumeResult.Message.Key,
-                            Value = dlqPayload
-                        },
-                        stoppingToken);
-
-                    consumer.Commit(consumeResult);
-                }
-                catch (Exception publishException)
-                {
-                    _logger.LogError(publishException, "Failed to send message to DLQ.");
-                }
+                await SendToDlqAsync(dlqProducer, consumeResult, ex, stoppingToken);
+                consumer.Commit(consumeResult);
             }
         }
+    }
+
+    private async Task SendToDlqAsync(
+        IProducer<string, string> dlqProducer,
+        ConsumeResult<string, string> consumeResult,
+        Exception exception,
+        CancellationToken cancellationToken)
+    {
+        var dlqMessage = new DlqMessage(
+            consumeResult.Message.Value,
+            exception.ToString(),
+            DateTime.UtcNow);
+
+        var dlqPayload = JsonSerializer.Serialize(dlqMessage);
+
+        await dlqProducer.ProduceAsync(
+            _options.TransactionCreatedDlqTopic,
+            new Message<string, string>
+            {
+                Key = consumeResult.Message.Key,
+                Value = dlqPayload
+            },
+            cancellationToken);
     }
 
     private async Task ConsolidateBalanceAsync(TransactionCreatedIntegrationEvent integrationEvent, CancellationToken cancellationToken)

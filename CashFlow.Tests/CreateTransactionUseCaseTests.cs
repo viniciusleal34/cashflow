@@ -13,13 +13,19 @@ public class CreateTransactionUseCaseTests
         var publisher = new FakePublisher();
         var useCase = new CreateTransactionUseCase(repository, unitOfWork, publisher);
 
-        var request = new CreateTransactionRequest(120m, "Credit", DateTime.UtcNow, "salary");
+        var before = DateTime.UtcNow;
+        var request = new CreateTransactionRequest(120m, "Credit", "salary");
         var result = await useCase.ExecuteAsync(request, CancellationToken.None);
+        var after = DateTime.UtcNow;
 
         Assert.Equal("Credit", result.Type);
         Assert.Single(repository.Items);
         Assert.Equal(1, unitOfWork.SaveCalls);
         Assert.Equal(1, publisher.PublishCalls);
+        Assert.Equal(repository.Items[0].OccurredAtUtc, result.OccurredAtUtc);
+        Assert.Equal(repository.Items[0].OccurredAtUtc, publisher.LastEvent!.OccurredAtUtc);
+        Assert.InRange(result.OccurredAtUtc, before.AddSeconds(-1), after.AddSeconds(1));
+        Assert.Equal(DateTimeKind.Utc, result.OccurredAtUtc.Kind);
     }
 
     [Fact]
@@ -30,7 +36,7 @@ public class CreateTransactionUseCaseTests
         var publisher = new FakePublisher();
         var useCase = new CreateTransactionUseCase(repository, unitOfWork, publisher);
 
-        var request = new CreateTransactionRequest(120m, "Unknown", DateTime.UtcNow, "invalid");
+        var request = new CreateTransactionRequest(120m, "Unknown", "invalid");
 
         await Assert.ThrowsAsync<ArgumentException>(() => useCase.ExecuteAsync(request, CancellationToken.None));
         Assert.Empty(repository.Items);
@@ -46,7 +52,7 @@ public class CreateTransactionUseCaseTests
         var publisher = new FakePublisher { ThrowOnPublish = true };
         var useCase = new CreateTransactionUseCase(repository, unitOfWork, publisher);
 
-        var request = new CreateTransactionRequest(50m, "Debit", DateTime.UtcNow, "market");
+        var request = new CreateTransactionRequest(50m, "Debit", "market");
         var result = await useCase.ExecuteAsync(request, CancellationToken.None);
 
         Assert.Equal("Debit", result.Type);
@@ -81,10 +87,12 @@ public class CreateTransactionUseCaseTests
     {
         public int PublishCalls { get; private set; }
         public bool ThrowOnPublish { get; set; }
+        public TransactionCreatedIntegrationEvent? LastEvent { get; private set; }
 
         public Task PublishAsync(TransactionCreatedIntegrationEvent integrationEvent, CancellationToken cancellationToken)
         {
             PublishCalls++;
+            LastEvent = integrationEvent;
 
             if (ThrowOnPublish)
             {

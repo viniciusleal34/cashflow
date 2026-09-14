@@ -16,4 +16,5 @@
 /Users/viniciusleal/GitHub/cashflow/CashFlow.Infrastructure/bin/Debug/net8.0/CashFlow.Application.dll
 /Users/viniciusleal/GitHub/cashflow/CashFlow.Infrastructure/bin/Debug/net8.0/CashFlow.Application.pdb
 /Users/viniciusleal/GitHub/cashflow/CashFlow.Infrastructure/obj/Debug/net8.0/CashFlow.Infrastructure.genruntimeconfig.cache
+/Users/viniciusleal/GitHub/cashflow/CashFlow.Infrastructure/obj/Debug/net8.0/CashFlow.Infrastructure.sourcelink.json
 /Users/viniciusleal/GitHub/cashflow/CashFlow.Infrastructure/obj/Debug/net8.0/CashFlow.84FCB40E.Up2Date

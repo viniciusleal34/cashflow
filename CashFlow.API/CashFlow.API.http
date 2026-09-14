@@ -1,6 +1,15 @@
-@CashFlow.API_HostAddress = http://localhost:5078
+POST http://localhost:8080/transactions
+Content-Type: application/json
 
-GET {{CashFlow.API_HostAddress}}/weatherforecast/
+{
+  "amount": 150.00,
+  "type": "Credit",
+  "description": "Venda"
+}
+
+###
+
+GET http://localhost:8080/balances/daily/2026-09-14
 Accept: application/json
 
 ###

@@ -9,3 +9,4 @@
 /Users/viniciusleal/GitHub/cashflow/CashFlow.Domain/obj/Debug/net8.0/refint/CashFlow.Domain.dll
 /Users/viniciusleal/GitHub/cashflow/CashFlow.Domain/obj/Debug/net8.0/CashFlow.Domain.pdb
 /Users/viniciusleal/GitHub/cashflow/CashFlow.Domain/obj/Debug/net8.0/ref/CashFlow.Domain.dll
+/Users/viniciusleal/GitHub/cashflow/CashFlow.Domain/obj/Debug/net8.0/CashFlow.Domain.sourcelink.json

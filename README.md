@@ -65,7 +65,6 @@ curl -X POST "http://localhost:8080/transactions" \
   -d '{
     "amount": 150.00,
     "type": "Credit",
-    "occurredAtUtc": "2026-09-14T10:00:00Z",
     "description": "Venda"
   }'
 ```
@@ -76,7 +75,6 @@ Body:
 {
   "amount": 150.00,
   "type": "Credit",
-  "occurredAtUtc": "2026-09-14T10:00:00Z",
   "description": "Venda"
 }
 ```

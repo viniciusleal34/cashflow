@@ -25,10 +25,12 @@ public sealed class CreateTransactionUseCase : ICreateTransactionUseCase
             throw new ArgumentException("Transaction type must be Credit or Debit.", nameof(request.Type));
         }
 
+        var occurredAtUtc = DateTime.UtcNow;
+
         var transaction = CashTransactions.Create(
             request.Amount,
             type,
-            request.OccurredAtUtc,
+            occurredAtUtc,
             request.Description);
 
         await _transactionRepository.AddAsync(transaction, cancellationToken);
@@ -38,7 +40,7 @@ public sealed class CreateTransactionUseCase : ICreateTransactionUseCase
             transaction.Id,
             transaction.Amount,
             transaction.Type.ToString(),
-            transaction.OccurredAtUtc,
+            occurredAtUtc,
             transaction.Description);
 
         try
@@ -54,7 +56,7 @@ public sealed class CreateTransactionUseCase : ICreateTransactionUseCase
             transaction.Id,
             transaction.Amount,
             transaction.Type.ToString(),
-            transaction.OccurredAtUtc,
+            occurredAtUtc,
             transaction.Description);
     }
 }
