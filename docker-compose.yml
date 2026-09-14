@@ -1,0 +1,60 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: cashflow-postgres
+    environment:
+      POSTGRES_DB: cashflow
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  kafka:
+    image: redpandadata/redpanda:v24.2.12
+    container_name: cashflow-kafka
+    command:
+      - redpanda
+      - start
+      - --overprovisioned
+      - --smp
+      - "1"
+      - --memory
+      - 1G
+      - --reserve-memory
+      - 0M
+      - --node-id
+      - "0"
+      - --check=false
+      - --kafka-addr
+      - PLAINTEXT://0.0.0.0:9092,OUTSIDE://0.0.0.0:19092
+      - --advertise-kafka-addr
+      - PLAINTEXT://kafka:9092,OUTSIDE://localhost:19092
+      - --set
+      - redpanda.auto_create_topics_enabled=true
+    ports:
+      - "19092:19092"
+
+  api:
+    build:
+      context: .
+      dockerfile: CashFlow.API/Dockerfile
+    container_name: cashflow-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__CashFlow: Host=postgres;Port=5432;Database=cashflow;Username=postgres;Password=postgres
+      Kafka__BootstrapServers: kafka:9092
+      Kafka__TransactionCreatedTopic: cashflow.transactions.created
+      Kafka__TransactionCreatedDlqTopic: cashflow.transactions.created.dlq
+      Kafka__ConsumerGroupId: cashflow-balance-consolidator
+    depends_on:
+      - postgres
+      - kafka
+    ports:
+      - "8080:8080"
+
+volumes:
+  postgres_data:
+
