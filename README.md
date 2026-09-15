@@ -6,16 +6,17 @@ API em C# para registrar créditos e débitos e consultar o saldo diário consol
 
 - `CashFlow.Domain`: regras e entidades de negócio.
 - `CashFlow.Application`: casos de uso e contratos.
-- `CashFlow.Infrastructure`: EF Core, PostgreSQL, Kafka e DLQ.
+- `CashFlow.Infrastructure`: EF Core, PostgreSQL, Redis outbox, Kafka e DLQ.
 - `CashFlow.API`: endpoints HTTP minimalistas.
 - `CashFlow.Tests`: testes unitários.
 
 Fluxo resumido:
 1. `POST /transactions` grava o lançamento no PostgreSQL.
-2. O evento de criação é publicado no Kafka.
-3. O consumer consolida o saldo diário.
-4. Se o processamento falhar, a mensagem vai para a DLQ.
-5. Se Kafka ou banco demorarem para subir, a aplicação tenta novamente sem derrubar a API.
+2. O evento entra no Redis como outbox.
+3. Um worker lê a outbox e publica no Kafka.
+4. O consumer consolida o saldo diário.
+5. Se o processamento falhar, a mensagem vai para a DLQ.
+6. O `Id` da transação evita duplicidade quando a mesma requisição é reenviada.
 
 ## Pré-requisitos
 
@@ -41,7 +42,7 @@ Swagger:
 ### Opção 2: rodar a API local e deixar infra no Docker
 
 ```bash
-docker compose up -d postgres kafka
+docker compose up -d postgres kafka redis
 dotnet run --project CashFlow.API
 ```
 
@@ -63,6 +64,7 @@ Exemplo de `curl`:
 curl -X POST "http://localhost:8080/transactions" \
   -H "Content-Type: application/json" \
   -d '{
+    "id": "c0b1d5d4-1f8b-4d8f-9db4-0c2b7dba6d8b",
     "amount": 150.00,
     "type": "Credit",
     "description": "Venda"
@@ -73,6 +75,7 @@ Body:
 
 ```json
 {
+  "id": "c0b1d5d4-1f8b-4d8f-9db4-0c2b7dba6d8b",
   "amount": 150.00,
   "type": "Credit",
   "description": "Venda"
@@ -94,15 +97,9 @@ curl "http://localhost:8080/balances/daily/2026-09-14"
 - Tópico principal: `cashflow.transactions.created`
 - DLQ: `cashflow.transactions.created.dlq`
 
-## Observações
+## Redis
 
-- Não foi usado `MediatR`, para manter a solução simples.
-- A persistência usa Entity Framework Core com PostgreSQL.
-- Não há arquivos `Class1.cs` no projeto.
-
-## Melhorias futuras
-
-- Outbox para garantir ainda mais confiabilidade na publicação do evento.
-- Retentativas no consumer com backoff exponencial.
-- Endpoint para consultar saldo por período.
+- Fila pendente: `cashflow:transactions:outbox:pending`
+- Fila em processamento: `cashflow:transactions:outbox:processing`
+- DLQ do outbox: `cashflow:transactions:outbox:dlq`
 

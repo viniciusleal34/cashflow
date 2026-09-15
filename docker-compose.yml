@@ -36,6 +36,12 @@ services:
     ports:
       - "19092:19092"
 
+  redis:
+    image: redis:7-alpine
+    container_name: cashflow-redis
+    ports:
+      - "6379:6379"
+
   api:
     build:
       context: .
@@ -49,9 +55,14 @@ services:
       Kafka__TransactionCreatedTopic: cashflow.transactions.created
       Kafka__TransactionCreatedDlqTopic: cashflow.transactions.created.dlq
       Kafka__ConsumerGroupId: cashflow-balance-consolidator
+      Redis__ConnectionString: redis:6379,abortConnect=false
+      Redis__OutboxPendingQueueKey: cashflow:transactions:outbox:pending
+      Redis__OutboxProcessingQueueKey: cashflow:transactions:outbox:processing
+      Redis__OutboxDeadLetterQueueKey: cashflow:transactions:outbox:dlq
     depends_on:
       - postgres
       - kafka
+      - redis
     ports:
       - "8080:8080"
 

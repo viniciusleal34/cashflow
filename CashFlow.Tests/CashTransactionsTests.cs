@@ -7,7 +7,7 @@ public class CashTransactionsTests
     [Fact]
     public void Create_ShouldThrow_WhenAmountIsInvalid()
     {
-        var action = () => CashTransactions.Create(0m, TransactionType.Credit, DateTime.UtcNow, "test");
+        var action = () => CashTransactions.Create(Guid.NewGuid(), 0m, TransactionType.Credit, DateTime.UtcNow, "test");
 
         var exception = Assert.Throws<ArgumentException>(action);
         Assert.Equal("amount", exception.ParamName);
@@ -16,7 +16,7 @@ public class CashTransactionsTests
     [Fact]
     public void Create_ShouldTrimDescription_AndKeepPositiveAmount()
     {
-        var transaction = CashTransactions.Create(10.5m, TransactionType.Debit, DateTime.UtcNow, "  coffee  ");
+        var transaction = CashTransactions.Create(Guid.NewGuid(), 10.5m, TransactionType.Debit, DateTime.UtcNow, "  coffee  ");
 
         Assert.Equal(10.5m, transaction.Amount);
         Assert.Equal("coffee", transaction.Description);

@@ -14,7 +14,7 @@ public class CreateTransactionUseCaseTests
         var useCase = new CreateTransactionUseCase(repository, unitOfWork, publisher);
 
         var before = DateTime.UtcNow;
-        var request = new CreateTransactionRequest(120m, "Credit", "salary");
+        var request = new CreateTransactionRequest(Guid.NewGuid(), 120m, "Credit", "salary");
         var result = await useCase.ExecuteAsync(request, CancellationToken.None);
         var after = DateTime.UtcNow;
 
@@ -36,7 +36,7 @@ public class CreateTransactionUseCaseTests
         var publisher = new FakePublisher();
         var useCase = new CreateTransactionUseCase(repository, unitOfWork, publisher);
 
-        var request = new CreateTransactionRequest(120m, "Unknown", "invalid");
+        var request = new CreateTransactionRequest(Guid.NewGuid(), 120m, "Unknown", "invalid");
 
         await Assert.ThrowsAsync<ArgumentException>(() => useCase.ExecuteAsync(request, CancellationToken.None));
         Assert.Empty(repository.Items);
@@ -52,10 +52,30 @@ public class CreateTransactionUseCaseTests
         var publisher = new FakePublisher { ThrowOnPublish = true };
         var useCase = new CreateTransactionUseCase(repository, unitOfWork, publisher);
 
-        var request = new CreateTransactionRequest(50m, "Debit", "market");
+        var request = new CreateTransactionRequest(Guid.NewGuid(), 50m, "Debit", "market");
         var result = await useCase.ExecuteAsync(request, CancellationToken.None);
 
         Assert.Equal("Debit", result.Type);
+        Assert.Single(repository.Items);
+        Assert.Equal(1, unitOfWork.SaveCalls);
+        Assert.Equal(1, publisher.PublishCalls);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_ShouldReturnExistingTransaction_WhenSameIdIsReplayed()
+    {
+        var repository = new InMemoryTransactionRepository();
+        var unitOfWork = new FakeUnitOfWork();
+        var publisher = new FakePublisher();
+        var useCase = new CreateTransactionUseCase(repository, unitOfWork, publisher);
+
+        var id = Guid.NewGuid();
+        var request = new CreateTransactionRequest(id, 80m, "Credit", "salary");
+
+        var firstResult = await useCase.ExecuteAsync(request, CancellationToken.None);
+        var secondResult = await useCase.ExecuteAsync(request, CancellationToken.None);
+
+        Assert.Equal(firstResult, secondResult);
         Assert.Single(repository.Items);
         Assert.Equal(1, unitOfWork.SaveCalls);
         Assert.Equal(1, publisher.PublishCalls);
@@ -69,6 +89,11 @@ public class CreateTransactionUseCaseTests
         {
             Items.Add(transaction);
             return Task.CompletedTask;
+        }
+
+        public Task<CashTransactions?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(Items.FirstOrDefault(x => x.Id == id));
         }
     }
 

@@ -20,14 +20,32 @@ public sealed class CreateTransactionUseCase : ICreateTransactionUseCase
 
     public async Task<CreateTransactionResult> ExecuteAsync(CreateTransactionRequest request, CancellationToken cancellationToken)
     {
+    if (request.Id == Guid.Empty)
+    {
+      throw new ArgumentException("Transaction id must be informed.", nameof(request.Id));
+    }
+
         if (!Enum.TryParse<TransactionType>(request.Type, true, out var type))
         {
             throw new ArgumentException("Transaction type must be Credit or Debit.", nameof(request.Type));
         }
 
+    var existingTransaction = await _transactionRepository.GetByIdAsync(request.Id, cancellationToken);
+
+    if (existingTransaction is not null)
+    {
+      return new CreateTransactionResult(
+        existingTransaction.Id,
+        existingTransaction.Amount,
+        existingTransaction.Type.ToString(),
+        existingTransaction.OccurredAtUtc,
+        existingTransaction.Description);
+    }
+
         var occurredAtUtc = DateTime.UtcNow;
 
         var transaction = CashTransactions.Create(
+      request.Id,
             request.Amount,
             type,
             occurredAtUtc,
